@@ -913,10 +913,10 @@ public class DimensionManager implements IGalaxy {
 
                     dimensionProperties.setParentPlanet(DimensionManager.overworldProperties);
                     dimensionProperties.setStar(DimensionManager.getInstance().getStar(0));
-                    dimensionProperties.isNativeDimension = !Loader.isModLoaded("GalacticraftCore");
+                    dimensionProperties.isNativeDimension = !Loader.isModLoaded("galacticraftcore");
                     dimensionProperties.initDefaultAttributes();
 
-                    DimensionManager.getInstance().registerDimNoUpdate(dimensionProperties, !Loader.isModLoaded("GalacticraftCore"));
+                    DimensionManager.getInstance().registerDimNoUpdate(dimensionProperties, !Loader.isModLoaded("galacticraftcore"));
                 }
 
                 generateRandomPlanets(DimensionManager.getInstance().getStar(0), numRandomGeneratedPlanets, numRandomGeneratedGasGiants);
