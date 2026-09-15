@@ -75,6 +75,7 @@ import zmaster587.advancedRocketry.enchant.EnchantmentSpaceBreathing;
 import zmaster587.advancedRocketry.entity.*;
 import zmaster587.advancedRocketry.event.*;
 import zmaster587.advancedRocketry.integration.GalacticCraftHandler;
+import zmaster587.advancedRocketry.integration.GalacticCraftCelestialBridge;
 import zmaster587.advancedRocketry.integration.theoneprobe.TopIntegration;
 import zmaster587.advancedRocketry.item.*;
 import zmaster587.advancedRocketry.item.components.ItemJetpack;
@@ -1131,6 +1132,10 @@ public class AdvancedRocketry {
 
         MinecraftForge.EVENT_BUS.register(new MapGenLander());
         AdvancedRocketryAPI.gravityManager = new GravityHandler();
+
+        if (Loader.isModLoaded("galacticraftcore")) {
+            GalacticCraftCelestialBridge.logRegisteredBodies();
+        }
 
         // Compat stuff
         if (Loader.isModLoaded("galacticraftcore") && zmaster587.advancedRocketry.api.ARConfiguration.getCurrentConfig().overrideGCAir) {
