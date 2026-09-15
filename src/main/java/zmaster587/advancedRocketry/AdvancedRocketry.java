@@ -1178,16 +1178,29 @@ public class AdvancedRocketry {
     public void serverStarted(FMLServerStartedEvent event) {
         for (int dimId : DimensionManager.getInstance().getLoadedDimensions()) {
             DimensionProperties properties = DimensionManager.getInstance().getDimensionProperties(dimId);
-            if (!properties.isNativeDimension && properties.getId() == zmaster587.advancedRocketry.api.ARConfiguration.getCurrentConfig().MoonId && !Loader.isModLoaded("GalacticraftCore")) {
+            if (!properties.isNativeDimension && properties.getId() == zmaster587.advancedRocketry.api.ARConfiguration.getCurrentConfig().MoonId && !Loader.isModLoaded("galacticraftcore")) {
                 properties.isNativeDimension = true;
             }
+        }
+
+        // Galacticraft's Forge dimensions are registered by this point.  Verify the
+        // final ownership relationship after both mods have completed server startup.
+        if (Loader.isModLoaded("galacticraftcore")) {
+            GalacticCraftCelestialBridge.verifyPrimaryMoonBinding();
         }
     }
 
     @EventHandler
     public void serverAboutToStart(FMLServerAboutToStartEvent event) {
+        // Let Voidspan bind AR's Moon slot to Galacticraft's externally owned
+        // Moon dimension before AR constructs its celestial model.
+        if (Loader.isModLoaded("galacticraftcore")) {
+            GalacticCraftCelestialBridge.bindPrimaryMoon();
+        }
+
         // Populate dimension properties before worlds get loaded
         DimensionManager.getInstance().createAndLoadDimensions(resetFromXml);
+
     }
 
     @EventHandler

@@ -54,17 +54,40 @@ public class GravityHandler implements IGravityManager {
             Double d;
             if (entityMap.containsKey(entity) && (d = entityMap.get(entity)) != null) {
 
-                double multiplier = (isOtherEntity(entity) || entity instanceof EntityItem) ? OTHER_OFFSET * d : (entity instanceof EntityArrow) ? ARROW_OFFSET * d : (entity instanceof EntityThrowable) ? THROWABLE_OFFSET * d : LIVING_OFFSET * d;
+                double multiplier =
+                        (isOtherEntity(entity) || entity instanceof EntityItem) ? OTHER_OFFSET * d :
+                                (entity instanceof EntityArrow) ? ARROW_OFFSET * d :
+                                        (entity instanceof EntityThrowable) ? THROWABLE_OFFSET * d :
+                                                LIVING_OFFSET * d;
 
                 entity.motionY += multiplier;
 
-            } else if (DimensionManager.getInstance().isDimensionCreated(entity.world.provider.getDimension()) || entity.world.provider instanceof WorldProviderSpace) {
+            } else if (gcWorldProvider != null &&
+                    gcWorldProvider.isAssignableFrom(entity.world.provider.getClass())) {
+
+                // Galacticraft owns the provider and therefore owns gravity behavior,
+                // even when Voidspan maps the dimension into AR's celestial model.
+                try {
+                    entity.motionY -= LIVING_OFFSET -
+                            (float) gcGetGravity.invoke(entity.world.provider);
+                } catch (IllegalAccessException | IllegalArgumentException |
+                         InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+
+            } else if (DimensionManager.getInstance().isDimensionCreated(
+                    entity.world.provider.getDimension()) ||
+                    entity.world.provider instanceof WorldProviderSpace) {
+
                 double gravMult;
 
                 if (entity.world.provider instanceof IPlanetaryProvider)
-                    gravMult = ((IPlanetaryProvider) entity.world.provider).getGravitationalMultiplier(entity.getPosition());
+                    gravMult = ((IPlanetaryProvider) entity.world.provider)
+                            .getGravitationalMultiplier(entity.getPosition());
                 else
-                    gravMult = DimensionManager.getInstance().getDimensionProperties(entity.world.provider.getDimension()).gravitationalMultiplier;
+                    gravMult = DimensionManager.getInstance()
+                            .getDimensionProperties(entity.world.provider.getDimension())
+                            .gravitationalMultiplier;
 
                 if (entity instanceof EntityItem)
                     entity.motionY -= (gravMult * OTHER_OFFSET - OTHER_OFFSET);
@@ -74,11 +97,13 @@ public class GravityHandler implements IGravityManager {
                     entity.motionY -= (gravMult * THROWABLE_OFFSET - THROWABLE_OFFSET);
                 else if (entity instanceof EntityArrow)
                     entity.motionY -= (gravMult * ARROW_OFFSET - ARROW_OFFSET);
-                else if (entity instanceof EntityLivingBase && entity.isInWater() || entity.isInLava())
-                    entity.motionY -= (gravMult * FLUID_LIVING_OFFSET - FLUID_LIVING_OFFSET);
+                else if (entity instanceof EntityLivingBase &&
+                        (entity.isInWater() || entity.isInLava()))
+                    entity.motionY -=
+                            (gravMult * FLUID_LIVING_OFFSET - FLUID_LIVING_OFFSET);
                 else if (entity instanceof EntityLivingBase)
-                    entity.motionY -= (gravMult * LIVING_OFFSET - LIVING_OFFSET);
-
+                    entity.motionY -=
+                            (gravMult * LIVING_OFFSET - LIVING_OFFSET);
             } else {
                 //GC handling
                 if (gcWorldProvider != null && gcWorldProvider.isAssignableFrom(entity.world.provider.getClass())) {
